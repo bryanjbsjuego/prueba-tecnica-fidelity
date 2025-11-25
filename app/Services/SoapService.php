@@ -90,6 +90,7 @@ class SoapService
                 'serialNumber' => $this->terminalSerial,
                 'username' => $this->terminalUser,
                 'password' => $this->terminalPassword,
+                'foreignID' => ''
             ];
 
             Log::info('SOAP Request - SynchroAndLogin', $params);
@@ -109,7 +110,7 @@ class SoapService
     /**
      * Método: SearchCustomerByPersonalData (Terminal)
      */
-    public function searchCustomerByPersonalData(string $sessionID, string $email): array
+    public function searchCustomerByPersonalData(string $sessionID, string $email, string $name, string $surname): array
     {
         try {
             $client = $this->getTerminalClient();
@@ -117,6 +118,17 @@ class SoapService
             $params = [
                 'sessionID' => $sessionID,
                 'email' => $email,
+                'name' => $name,
+                'surname' => $surname,
+                'birthdate' => '',
+                'birthdateDay' => 26,
+                'birthdateMonth' => 10,
+                'birthdateYear' => 1996,
+                'cellphone' => '5586199940',
+                'facebookId' => '',
+                'card' => '',
+                'identityCard' => $sessionID,
+                'pagination' => 0
             ];
 
             Log::info('SOAP Request - SearchCustomerByPersonalData', $params);
@@ -221,16 +233,20 @@ class SoapService
     /**
      * Convertir objeto SOAP a array
      */
-    private function convertToArray($data): array
+    private function convertToArray(mixed $data): mixed
     {
         if (is_object($data)) {
             $data = get_object_vars($data);
         }
 
         if (is_array($data)) {
-            return array_map([$this, 'convertToArray'], $data);
+            foreach ($data as $key => $value) {
+                $data[$key] = $this->convertToArray($value);
+            }
+            return $data;
         }
 
+        // valor escalar (string, int, bool, null, etc.)
         return $data;
     }
 

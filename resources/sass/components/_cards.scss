@@ -1,0 +1,38 @@
+.card {
+  background: white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+  transition: all $transition-base;
+
+  &--hover {
+    &:hover {
+      box-shadow: $shadow-lg;
+      transform: translateY(-4px);
+    }
+  }
+
+  &--clickable {
+    cursor: pointer;
+  }
+
+  &__image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__content {
+    padding: $spacing-lg;
+  }
+
+  &__footer {
+    padding: 0 $spacing-lg $spacing-lg;
+  }
+}

@@ -1,0 +1,67 @@
+.container {
+  max-width: 1920px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+
+  @include respond-to(tablet) {
+    padding: 0 $spacing-2xl;
+  }
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page__content {
+  flex: 1;
+  padding: $spacing-2xl 0;
+
+  @include respond-to(tablet) {
+    padding: $spacing-3xl 0;
+  }
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: $spacing-2xl;
+}
+
+.page-title {
+  font-size: 2rem;
+  margin-bottom: $spacing-sm;
+
+  @include respond-to(tablet) {
+    font-size: 2.5rem;
+  }
+}
+
+.page-subtitle {
+  color: $color-text-white;
+  font-size: 1.125rem;
+}
+
+.alert {
+  padding: $spacing-md $spacing-lg;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-lg;
+
+  &--error {
+    background: rgba($color-primary, 0.1);
+    color: $color-primary;
+    border: 1px solid $color-primary;
+  }
+
+  &--success {
+    background: rgba($color-secondary, 0.1);
+    color: $color-secondary;
+    border: 1px solid $color-secondary;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: $spacing-3xl;
+  color: $color-text-white;
+}

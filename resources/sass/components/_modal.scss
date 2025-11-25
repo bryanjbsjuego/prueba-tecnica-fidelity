@@ -1,0 +1,87 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  @include flex-center;
+  z-index: $z-modal-backdrop;
+  padding: $spacing-lg;
+}
+
+.modal-container {
+  position: relative;
+  background: white;
+  border-radius: $radius-xl;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: $shadow-xl;
+
+  @include respond-to(tablet) {
+    max-width: 700px;
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: $spacing-md;
+  right: $spacing-md;
+  width: 32px;
+  height: 32px;
+  @include flex-center;
+  background: $color-text-gray-01;
+  border-radius: $radius-full;
+  font-size: 1.25rem;
+  color: $color-text-white;
+  transition: all $transition-fast;
+  z-index: 1;
+
+  &:hover {
+    background: $color-border;
+    color: $color-text;
+  }
+}
+
+.modal-header {
+  padding: $spacing-xl $spacing-xl $spacing-lg;
+  border-bottom: 1px solid $color-border-light;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal-body {
+  padding: $spacing-xl;
+}
+
+.modal-footer {
+  padding: $spacing-lg $spacing-xl $spacing-xl;
+  border-top: 1px solid $color-border-light;
+  @include flex-center;
+  gap: $spacing-md;
+}
+
+// Modal transitions
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity $transition-base;
+
+  .modal-container {
+    transition: transform $transition-base;
+  }
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+
+  .modal-container {
+    transform: scale(0.9);
+  }
+}

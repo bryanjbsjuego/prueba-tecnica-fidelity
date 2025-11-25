@@ -1,0 +1,95 @@
+.login-page {
+    min-height: 100vh;
+    @include flex-center;
+    background: url("../../images/Banners/banner-login.jpg") no-repeat center center;
+    padding   : $spacing-lg;
+}
+
+.login-container {
+    width    : 100%;
+    max-width: 450px;
+}
+
+.login-card {
+    background   : rgba(255, 255, 255, 0.8);
+    border-radius: $radius-xl;
+    padding      : $spacing-2xl;
+    box-shadow   : $shadow-xl;
+    height       : auto;
+    ;
+
+    @include respond-to(tablet) {
+        padding: $spacing-3xl;
+    }
+}
+
+.login-header {
+    display        : flex;
+    justify-content: center;
+    align-items    : center;
+    margin-bottom  : $spacing-xl;
+}
+
+.login-title {
+    font-size    : 2rem;
+    margin-bottom: $spacing-sm;
+}
+
+.login-subtitle {
+    color    : $color-text-white;
+    font-size: 0.875rem;
+}
+
+.login-form {
+    margin-bottom : $spacing-lg;
+    display       : flex;
+    flex-direction: column;
+}
+
+.login-submit {
+    width      : 30%;
+    margin-left: auto;
+    margin-top : $spacing-md;
+}
+
+.login-footer {
+    text-align: left;
+}
+
+.forgot-password {
+    font-size: 0.875rem;
+    color    : $color-text;
+    text-decoration: underline;
+
+    a {
+        color      : $color-text;
+        font-weight: 500;
+
+        &:hover {
+            color          : $color-primary;
+            text-decoration: underline;
+        }
+    }
+}
+
+
+.help {
+    font-size: 0.875rem;
+    color    : $color-text;
+
+    a {
+        color      : $color-text;
+        font-weight: 500;
+
+        &:hover {
+            color          : $color-primary;
+            text-decoration: underline;
+        }
+    }
+}
+
+.login-logo {
+    width  : 140px;
+    display: block;
+    margin : 0 auto;
+}
