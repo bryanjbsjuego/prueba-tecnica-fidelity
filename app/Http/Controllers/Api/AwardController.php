@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\SoapService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
-class PremiosController extends Controller
+class AwardController extends Controller
 {
     public function __construct(private SoapService $soapService) {}
 
@@ -83,6 +84,8 @@ class PremiosController extends Controller
                 ];
             }, $prizeList);
 
+            Log::info($prizes);
+
             return response()->json([
                 'success' => true,
                 'prizes' => $prizes,
@@ -94,7 +97,7 @@ class PremiosController extends Controller
                 ]
             ]);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Get prizes error: ' . $e->getMessage());
 
             return response()->json([

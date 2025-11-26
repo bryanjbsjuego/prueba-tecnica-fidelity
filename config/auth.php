@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Operator;
+
 return [
 
     /*
@@ -41,8 +43,8 @@ return [
             'provider' => 'users',
         ],
          'api' => [
-            'driver' => 'session',
-            'provider' => 'users',
+            'driver' => 'jwt',
+            'provider' => 'operadores',
         ],
     ],
 
@@ -67,6 +69,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+        'operadores' => [
+            'driver' => 'eloquent',
+            'model' => Operator::class,
         ],
 
         // 'users' => [

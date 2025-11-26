@@ -1,67 +1,74 @@
 .container {
-  max-width: 1920px;
-  margin: 0 auto;
-  padding: 0 $spacing-lg;
+    max-width: 1920px;
+    margin   : 0 auto;
+    padding  : 0 $spacing-lg;
 
-  @include respond-to(tablet) {
-    padding: 0 $spacing-2xl;
-  }
+    @include respond-to(tablet) {
+        padding: 0 $spacing-2xl;
+    }
 }
 
 .page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+    min-height    : 100vh;
+    display       : flex;
+    flex-direction: column;
 }
 
 .page__content {
-  flex: 1;
-  padding: $spacing-2xl 0;
+    flex        : 1;
 
-  @include respond-to(tablet) {
-    padding: $spacing-3xl 0;
-  }
+    @include respond-to(tablet) {
+    }
 }
 
 .page-header {
-  text-align: center;
-  margin-bottom: $spacing-2xl;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color     : $color-primary
 }
 
 .page-title {
-  font-size: 2rem;
-  margin-bottom: $spacing-sm;
+    font-size    : 2rem;
+    margin-bottom: $spacing-sm;
+    margin-top: $spacing-3xl;
 
-  @include respond-to(tablet) {
-    font-size: 2.5rem;
-  }
+    @include respond-to(tablet) {
+        font-size: 2.5rem;
+    }
 }
 
 .page-subtitle {
-  color: $color-text-white;
-  font-size: 1.125rem;
+    display: flex;
+    color  : $color-text;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    font-size  : 1.125rem;
+    width      : 760px;
+    text-align : center;
 }
 
 .alert {
-  padding: $spacing-md $spacing-lg;
-  border-radius: $radius-md;
-  margin-bottom: $spacing-lg;
+    padding      : $spacing-md $spacing-lg;
+    border-radius: $radius-md;
+    margin-bottom: $spacing-lg;
 
-  &--error {
-    background: rgba($color-primary, 0.1);
-    color: $color-primary;
-    border: 1px solid $color-primary;
-  }
+    &--error {
+        background: $color-primary;
+        color     : $color-white;
+        border    : 1px solid $color-primary;
+    }
 
-  &--success {
-    background: rgba($color-secondary, 0.1);
-    color: $color-secondary;
-    border: 1px solid $color-secondary;
-  }
+    &--success {
+        background: rgba($color-secondary, 0.1);
+        color     : $color-secondary;
+        border    : 1px solid $color-secondary;
+    }
 }
 
 .empty-state {
-  text-align: center;
-  padding: $spacing-3xl;
-  color: $color-text-white;
+    text-align: left;
+    padding   : $spacing-3xl;
+    padding-left   : 250px;
+    color     : $color-text;
 }

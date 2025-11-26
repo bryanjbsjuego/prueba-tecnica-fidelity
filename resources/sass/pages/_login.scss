@@ -1,3 +1,5 @@
+
+
 .login-page {
     min-height: 100vh;
     @include flex-center;
@@ -7,7 +9,7 @@
 
 .login-container {
     width    : 100%;
-    max-width: 450px;
+    max-width: 420px;
 }
 
 .login-card {
@@ -15,7 +17,7 @@
     border-radius: $radius-xl;
     padding      : $spacing-2xl;
     box-shadow   : $shadow-xl;
-    height       : auto;
+    height       : 470px;
     ;
 
     @include respond-to(tablet) {
@@ -92,4 +94,9 @@
     width  : 140px;
     display: block;
     margin : 0 auto;
+}
+
+.icon-format {
+    width: 20px;
+    color:white ;
 }

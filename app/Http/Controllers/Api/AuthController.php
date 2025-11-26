@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginFormRequest;
 use App\Services\SoapService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
@@ -21,23 +22,34 @@ class AuthController extends Controller
             $password = $request->input('password');
 
             // Paso 1: SynchroAndLogin en Terminal
-            $terminalResponse = $this->soapService->synchroAndLogin();
+            $synchroResponse  = $this->soapService->synchroAndLogin();
 
-            if ($terminalResponse['answerCode'] != 0) {
+            if (!isset($synchroResponse['answerCode']) || $synchroResponse['answerCode'] != 0) {
+                Log::error('Error en SynchroAndLogin', $synchroResponse);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Error al conectar con el servicio de autenticación'
+                    'message' => 'Error al conectar con el servicio'
                 ], 500);
             }
 
-            $sessionID = $terminalResponse['sessionID'];
-            $name = $terminalResponse['operator']['name'];
-            $surname = $terminalResponse['operator']['surname'];
+
+            $sessionID = $synchroResponse['sessionID'];
+            $name = $synchroResponse['operator']['name'];
+            $surname = $synchroResponse['operator']['surname'];
 
             // Paso 2: SearchCustomerByPersonalData
             $customerSearch = $this->soapService->searchCustomerByPersonalData($sessionID, $email, $name, $surname);
 
-            if ($customerSearch['answerCode'] != 0) {
+
+            if (!isset($customerSearch['answerCode']) || $customerSearch['answerCode'] != 0) {
+                Log::error('Error en SearchCustomerByPersonalData', $customerSearch);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al buscar el cliente'
+                ], 500);
+            }
+
+            if (empty($customerSearch['customerList'])) {
                 return response()->json([
                     'success' => false,
                     'message' => 'La cuenta no se encuentra registrada en nuestro sistema'
@@ -47,18 +59,32 @@ class AuthController extends Controller
             // Paso 3: Validar status del cliente
             $customerList = $customerSearch['customerList'];
 
-            if (!is_array($customerList)) {
+            if (!isset($customerList[0])) {
                 $customerList = [$customerList];
             }
 
             $validCustomer = null;
             foreach ($customerList as $customer) {
+                // Debug de cada cliente
+                Log::info('Validando cliente', [
+                    'status' => $customer['status'] ?? 'not_set',
+                    'customer_area_status' => $customer['customer_area_status'] ?? 'not_set',
+                ]);
+
+                // Validación según requerimientos:
+                // status debe ser 1
+                // customer_area_status debe ser 1 o 4
                 if (
-                    isset($customer['status']) && $customer['status'] == 1 &&
+                    isset($customer['status']) &&
+                    $customer['status'] == 1 &&
                     isset($customer['customer_area_status']) &&
                     in_array($customer['customer_area_status'], [1, 4])
                 ) {
                     $validCustomer = $customer;
+                    Log::info('Cliente válido encontrado', [
+                        'id' => $customer['id'] ?? 'N/A',
+                        'userName' => $customer['personalInfo']['userName'] ?? 'N/A'
+                    ]);
                     break;
                 }
             }
@@ -94,6 +120,7 @@ class AuthController extends Controller
             // Paso 5: Login en Customer Area
             $caLogin = $this->soapService->loginCustomerArea($caSession, $userName, $password);
 
+
             if ($caLogin['answerCode'] != 0) {
                 return response()->json([
                     'success' => false,
@@ -103,21 +130,14 @@ class AuthController extends Controller
 
             $customer = $caLogin['customer'];
 
-            // Guardar sesión en storage/session si es necesario
-            $sessionData = [
-                'session' => $caSession,
-                'customer' => $customer,
-                'email' => $email,
-            ];
-
             return response()->json([
                 'success' => true,
                 'message' => 'Autenticación exitosa',
                 'session' => $caSession,
                 'customer' => $customer,
+                'userName' => $userName
             ]);
-
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Login error: ' . $e->getMessage());
 
             return response()->json([

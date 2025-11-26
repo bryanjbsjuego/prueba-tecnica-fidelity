@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('alianzas', function (Blueprint $table) {
             $table->id('alianza_id')->comment('Identificador único de la alianza');
             $table->string('nombre', 120)->comment('Nombre de la alianza');
-            $table->boolean('estatus')->default(true)->comment('Estatus de la alianza');
+            $table->string('descripcion', 255)->comment('Descripción de la alianza');
+            $table->enum('estatus', ['activo', 'usado', 'inactivo'])->default('activo');
             $table->timestamp('fecha_uso')->comment('Fecha que se uso la alianza')->nullable();
             $table->timestamp('fecha_registro')->useCurrent()->comment('Fecha de alta de la alianza');
             $table->timestamp('fecha_actualizacion')->nullable()->useCurrentOnUpdate()->comment('Fecha de actualización de la alianza');

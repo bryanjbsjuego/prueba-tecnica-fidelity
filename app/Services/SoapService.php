@@ -32,9 +32,6 @@ class SoapService
         $this->caCampaignId = config('services.soap.ca_campaign_id');
     }
 
-    /**
-     * Obtener cliente SOAP de Terminal
-     */
     private function getTerminalClient(): SoapClient
     {
         if (!$this->terminalClient) {
@@ -55,11 +52,9 @@ class SoapService
         return $this->terminalClient;
     }
 
-    /**
-     * Obtener cliente SOAP de Customer Area
-     */
     private function getCustomerAreaClient(): SoapClient
     {
+        // Log::info($this->getCustomerAreaMethods());
         if (!$this->customerAreaClient) {
             try {
                 $this->customerAreaClient = new SoapClient($this->caUrl, [
@@ -90,7 +85,7 @@ class SoapService
                 'serialNumber' => $this->terminalSerial,
                 'username' => $this->terminalUser,
                 'password' => $this->terminalPassword,
-                'foreignID' => ''
+                'foreignID' => null
             ];
 
             Log::info('SOAP Request - SynchroAndLogin', $params);
@@ -99,7 +94,18 @@ class SoapService
 
             Log::info('SOAP Response - SynchroAndLogin', (array)$response);
 
-            return $this->convertToArray($response);
+            $result = $this->convertToArray($response);
+
+            // Validar answerCode
+            if (!isset($result['answerCode']) || $result['answerCode'] != 0) {
+                throw new \Exception('Error en la sincronización con el servicio');
+            }
+
+            if (!isset($result['sessionID'])) {
+                throw new \Exception('No se recibió sessionID del servicio');
+            }
+
+            return $result;
 
         } catch (SoapFault $e) {
             Log::error('SOAP Error - SynchroAndLogin: ' . $e->getMessage());
@@ -109,8 +115,9 @@ class SoapService
 
     /**
      * Método: SearchCustomerByPersonalData (Terminal)
+     * Solo el email es obligatorio según los requerimientos
      */
-    public function searchCustomerByPersonalData(string $sessionID, string $email, string $name, string $surname): array
+    public function searchCustomerByPersonalData(string $sessionID, string $email): array
     {
         try {
             $client = $this->getTerminalClient();
@@ -118,31 +125,78 @@ class SoapService
             $params = [
                 'sessionID' => $sessionID,
                 'email' => $email,
-                'name' => $name,
-                'surname' => $surname,
+                'name' => '',
+                'surname' => '',
                 'birthdate' => '',
-                'birthdateDay' => 26,
-                'birthdateMonth' => 10,
-                'birthdateYear' => 1996,
-                'cellphone' => '5586199940',
+                'birthdateDay' => 0,
+                'birthdateMonth' => 0,
+                'birthdateYear' => 0,
+                'cellphone' => '',
                 'facebookId' => '',
                 'card' => '',
-                'identityCard' => $sessionID,
+                'identityCard' => '',
                 'pagination' => 0
             ];
 
-            Log::info('SOAP Request - SearchCustomerByPersonalData', $params);
+            Log::info('SOAP Request - SearchCustomerByPersonalData', ['sessionID' => $sessionID, 'email' => $email]);
 
             $response = $client->__soapCall('SearchCustomerByPersonalData', [$params]);
 
             Log::info('SOAP Response - SearchCustomerByPersonalData', (array)$response);
 
-            return $this->convertToArray($response);
+            $result = $this->convertToArray($response);
+
+            // Validar answerCode
+            if (!isset($result['answerCode']) || $result['answerCode'] != 0) {
+                throw new \Exception('Error al buscar el cliente');
+            }
+
+            return $result;
 
         } catch (SoapFault $e) {
             Log::error('SOAP Error - SearchCustomerByPersonalData: ' . $e->getMessage());
             throw new \Exception('Error en SearchCustomerByPersonalData: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Validar el customer según los requerimientos
+     */
+    public function validateCustomer(array $searchResult): array
+    {
+        if (!isset($searchResult['customerList'])) {
+            throw new \Exception('La cuenta no se encuentra registrada en nuestro sistema');
+        }
+
+        $customerList = $searchResult['customerList'];
+
+        // Si customerList es un array de clientes, tomar el primero
+        if (isset($customerList[0])) {
+            $customer = $customerList[0];
+        } else {
+            $customer = $customerList;
+        }
+
+        // Validar status = 1
+        if (!isset($customer['status']) || $customer['status'] != 1) {
+            throw new \Exception('La cuenta no se encuentra registrada en nuestro sistema');
+        }
+
+        // Validar customer_area_status = 1 o 4
+        if (!isset($customer['customer_area_status']) ||
+            ($customer['customer_area_status'] != 1 && $customer['customer_area_status'] != 4)) {
+            throw new \Exception('La cuenta no se encuentra registrada en nuestro sistema');
+        }
+
+        // Extraer userName
+        if (!isset($customer['personalInfo']['userName'])) {
+            throw new \Exception('No se pudo obtener el nombre de usuario');
+        }
+
+        return [
+            'userName' => $customer['personalInfo']['userName'],
+            'customer' => $customer
+        ];
     }
 
     /**
@@ -164,7 +218,18 @@ class SoapService
 
             Log::info('SOAP Response - Synchro CA', (array)$response);
 
-            return $this->convertToArray($response);
+            $result = $this->convertToArray($response);
+
+            // Validar answerCode
+            if (!isset($result['answerCode']) || $result['answerCode'] != 0) {
+                throw new \Exception('Error en la sincronización con Customer Area');
+            }
+
+            if (!isset($result['session'])) {
+                throw new \Exception('No se recibió session de Customer Area');
+            }
+
+            return $result;
 
         } catch (SoapFault $e) {
             Log::error('SOAP Error - Synchro CA: ' . $e->getMessage());
@@ -184,6 +249,11 @@ class SoapService
                 'session' => $session,
                 'username' => $username,
                 'password' => $password,
+                'deviceType' => 0,
+                'versionFW' => '',
+                'rememberMe' => '',
+                'calculateBillingData' => '',
+                'playerID' => ''
             ];
 
             Log::info('SOAP Request - Login CA', ['session' => $session, 'username' => $username]);
@@ -192,7 +262,18 @@ class SoapService
 
             Log::info('SOAP Response - Login CA', (array)$response);
 
-            return $this->convertToArray($response);
+            $result = $this->convertToArray($response);
+
+            // Validar answerCode
+            if (!isset($result['answerCode']) || $result['answerCode'] != 0) {
+                throw new \Exception('Credenciales incorrectas');
+            }
+
+            if (!isset($result['customer'])) {
+                throw new \Exception('No se recibió información del cliente');
+            }
+
+            return $result;
 
         } catch (SoapFault $e) {
             Log::error('SOAP Error - Login CA: ' . $e->getMessage());
@@ -209,11 +290,27 @@ class SoapService
             $client = $this->getCustomerAreaClient();
 
             $params = [
-                'session' => $session,
+                'sessionID' => $session,
+                'catalogId' => 0,
+                'prizeID' => 0,
+                'categoryId' => 0,
+                'prizeEnabled' => null,
+                'prizeCode' => "",
+                'useBalanceCustomer' => false,
                 'pagination' => [
                     'InitLimit' => $initLimit,
                     'rowCount' => $rowCount,
-                ]
+                    'orders' => [
+                        'columnName' => "",
+                        'criterial' => ""
+                    ]
+                ],
+                'onlyOutstandingPrize' => false,
+                'filterKind' => 0,
+                'lastDays' => 0,
+                'prizesCount' => 0,
+                'onlyForGift' => false,
+                'showOnlyPrizeNotExceed' => false
             ];
 
             Log::info('SOAP Request - GetPrizesByCustomer', $params);
@@ -222,17 +319,22 @@ class SoapService
 
             Log::info('SOAP Response - GetPrizesByCustomer');
 
-            return $this->convertToArray($response);
+            $result = $this->convertToArray($response);
+
+            // Validar answerCode
+            if (!isset($result['answerCode']) || $result['answerCode'] != 0) {
+                throw new \Exception('Error al obtener los premios');
+            }
+
+            return $result;
 
         } catch (SoapFault $e) {
             Log::error('SOAP Error - GetPrizesByCustomer: ' . $e->getMessage());
+            Log::error('SOAP Error en linea - GetPrizesByCustomer: ' . $e->getLine());
             throw new \Exception('Error en GetPrizesByCustomer: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Convertir objeto SOAP a array
-     */
     private function convertToArray(mixed $data): mixed
     {
         if (is_object($data)) {
@@ -246,13 +348,9 @@ class SoapService
             return $data;
         }
 
-        // valor escalar (string, int, bool, null, etc.)
         return $data;
     }
 
-    /**
-     * Obtener último request XML (para debugging)
-     */
     public function getLastRequest(): ?string
     {
         if ($this->terminalClient) {
@@ -266,9 +364,6 @@ class SoapService
         return null;
     }
 
-    /**
-     * Obtener último response XML (para debugging)
-     */
     public function getLastResponse(): ?string
     {
         if ($this->terminalClient) {
@@ -281,4 +376,5 @@ class SoapService
 
         return null;
     }
+
 }

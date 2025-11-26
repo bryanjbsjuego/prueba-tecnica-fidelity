@@ -9,13 +9,31 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../pages/LoginPage.vue'),
+    component: () => import('../Pages/LoginPage.vue'),
     meta: { requiresAuth: false }
+  },
+  {
+    path: '/registro',
+    name: 'Registro',
+    component: () => import('../Pages/LoginPage.vue'),
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/catalogo-premios',
+    name: 'CatalogoPremios',
+    component: () => import('../Pages/CataloguesAwards.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/alianzas',
+    name: 'Alianzas',
+    component: () => import('../Pages/Alliance.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/home',
     name: 'Home',
-    component: () => import('../pages/Home.vue'),
+    component: () => import('../Pages/Home.vue'),
     meta: { requiresAuth: true }
   },
   {

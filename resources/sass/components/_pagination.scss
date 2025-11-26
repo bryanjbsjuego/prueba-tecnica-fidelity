@@ -4,13 +4,14 @@
   justify-content: center;
   gap: $spacing-sm;
   margin-top: $spacing-2xl;
+  margin-bottom: $spacing-2xl;
 }
 
 .pagination__btn,
 .pagination__page {
   padding: $spacing-sm $spacing-md;
   border: 2px solid $color-border;
-  border-radius: $radius-md;
+  border-radius: $radius-full;
   background: white;
   color: $color-text;
   font-size: 0.875rem;
@@ -18,7 +19,7 @@
   transition: all $transition-fast;
   cursor: pointer;
 
-  &:hover:not(:disabled) {
+  &:hover:not(:disabled):not(.is-active) {
     border-color: $color-primary;
     color: $color-primary;
   }
@@ -29,15 +30,22 @@
   }
 }
 
-.pagination__page--active {
-  background: $color-primary;
-  border-color: $color-primary;
-  color: white;
+.pagination__page {
+  min-width: 40px;
+  text-align: center;
 
-  &:hover {
-    background: $color-primary;
-    border-color: $color-primary;
-    color: white;
+  // ✅ Mayor especificidad para el estado activo
+  &.is-active {
+    background: $color-primary !important;
+    border-color: $color-primary !important;
+    color: white !important;
+    cursor: default;
+
+    &:hover {
+      background: $color-primary !important;
+      border-color: $color-primary !important;
+      color: white !important;
+    }
   }
 }
 

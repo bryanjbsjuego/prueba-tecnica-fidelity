@@ -25,7 +25,7 @@
         class="input-toggle"
         @click="togglePasswordVisibility"
       >
-        👁️
+      <EyeIcon class="icon-format" style="color: brown;" />
       </button>
     </div>
 
@@ -36,6 +36,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
   modelValue: [String, Number],

@@ -5,14 +5,15 @@
       :disabled="currentPage === 1"
       @click="changePage(currentPage - 1)"
     >
-      ← Anterior
+      <
     </button>
 
     <div class="pagination__pages">
       <button
         v-for="page in visiblePages"
         :key="page"
-        :class="['pagination__page', { 'pagination__page--active': page === currentPage }]"
+        class="pagination__page"
+        :class="{ 'is-active': page === currentPage }"
         @click="changePage(page)"
       >
         {{ page }}
@@ -24,7 +25,7 @@
       :disabled="currentPage === totalPages"
       @click="changePage(currentPage + 1)"
     >
-      Siguiente →
+      >
     </button>
   </div>
 </template>

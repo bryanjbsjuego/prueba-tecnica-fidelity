@@ -3,6 +3,8 @@
   flex-direction: column;
   gap: $spacing-md;
   margin-bottom: $spacing-2xl;
+  margin-left: 250px;
+  margin-right: 350px;
   padding: $spacing-lg;
   background: white;
   border-radius: $radius-lg;
@@ -19,7 +21,7 @@
   flex: 1;
 
   @include respond-to(tablet) {
-    max-width: 400px;
+    max-width: 210px;
   }
 }
 
@@ -137,4 +139,12 @@
     color: $color-text-white;
     line-height: 1.6;
   }
+}
+
+.premio-card__points{
+    color: $color-text
+}
+
+.premio-card__title{
+    color: $color-text-gray-02
 }
