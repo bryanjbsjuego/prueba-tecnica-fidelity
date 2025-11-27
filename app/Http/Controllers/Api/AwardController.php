@@ -1,12 +1,11 @@
 <?php
 
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AwardRequest;
 use App\Services\SoapService;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
@@ -14,64 +13,88 @@ class AwardController extends Controller
 {
     public function __construct(private SoapService $soapService) {}
 
-    public function index(Request $request): JsonResponse
+    public function index(AwardRequest $request): JsonResponse
     {
-        $request->validate([
-            'session' => 'required|string',
-            'page' => 'integer|min:1',
-            'limit' => 'integer|min:1|max:100',
-            'search' => 'string|nullable',
-            'order' => 'in:asc,desc|nullable',
-        ]);
-
         try {
             $session = $request->input('session');
-            $page = $request->input('page', 1);
-            $limit = $request->input('limit', 8);
+            $page = (int) $request->input('page', 1);
+            $limit = (int) $request->input('limit', 8);
             $search = $request->input('search', '');
+            $sortBy = $request->input('sort_by', 'name');
             $order = $request->input('order', 'asc');
 
-            $initLimit = ($page - 1) * $limit;
+            Log::info('Award filter params', [
+                'search' => $search,
+                'sort_by' => $sortBy,
+                'order' => $order,
+                'page' => $page,
+                'limit' => $limit
+            ]);
 
-            // Llamada al WS para obtener premios
-            $response = $this->soapService->getPrizesByCustomer($session, $initLimit, 100);
+            $response = $this->soapService->getPrizesByCustomer($session, 0, 100);
 
-            if ($response['answerCode'] != 0) {
+            if (!is_array($response) || ($response['answerCode'] ?? 1) != 0) {
+                Log::error('GetPrizesByCustomer returned error', ['response' => $response]);
                 return response()->json([
                     'success' => false,
                     'message' => 'Error al obtener los premios'
                 ], 500);
             }
 
-            $prizeList = $response['prizeList'] ?? [];
+            $rawPrizeList = $response['prizeList'] ?? [];
 
-            if (!is_array($prizeList)) {
-                $prizeList = [$prizeList];
+            // Normalizar a array
+            if (!is_array($rawPrizeList)) {
+                $rawPrizeList = empty($rawPrizeList) ? [] : [$rawPrizeList];
             }
 
-            // Filtrar por búsqueda
+            $raw_count = count($rawPrizeList);
+
+            // Filtrar por búsqueda (nombre del premio)
+            $filteredList = $rawPrizeList;
             if (!empty($search)) {
-                $prizeList = array_filter($prizeList, function($prize) use ($search) {
+                $filteredList = array_filter($rawPrizeList, function($prize) use ($search) {
                     return stripos($prize['name'] ?? '', $search) !== false;
                 });
-                $prizeList = array_values($prizeList); // Reindexar
+                $filteredList = array_values($filteredList);
             }
 
-            // Ordenar por nombre
-            usort($prizeList, function($a, $b) use ($order) {
-                $nameA = $a['name'] ?? '';
-                $nameB = $b['name'] ?? '';
-
-                if ($order === 'desc') {
-                    return strcmp($nameB, $nameA);
+            // Ordenar por nombre, puntos o dinero
+            usort($filteredList, function($a, $b) use ($sortBy, $order) {
+                if ($sortBy === 'money') {
+                    // Limpiar y convertir a float, manejando posibles formatos como "1,234.56"
+                    $valA = floatval(str_replace(',', '', $a['moneyValue'] ?? 0));
+                    $valB = floatval(str_replace(',', '', $b['moneyValue'] ?? 0));
+                    $cmp = $valA <=> $valB;
+                } elseif ($sortBy === 'points') {
+                    $valA = intval($a['points'] ?? 0);
+                    $valB = intval($b['points'] ?? 0);
+                    $cmp = $valA <=> $valB;
+                } else {
+                    // Ordenar por nombre (alfabéticamente)
+                    $valA = strtolower($a['name'] ?? '');
+                    $valB = strtolower($b['name'] ?? '');
+                    $cmp = strcmp($valA, $valB);
                 }
-                return strcmp($nameA, $nameB);
+
+                return $order === 'desc' ? -$cmp : $cmp;
             });
 
-            $total = count($prizeList);
+            $filtered_count = count($filteredList);
+            $total_pages = (int) ceil($filtered_count / $limit);
 
-            // Paginar
-            $prizeList = array_slice($prizeList, $initLimit, $limit);
+            // Validar página actual
+            if ($page > $total_pages && $total_pages > 0) {
+                $page = $total_pages;
+            }
+            if ($page < 1) {
+                $page = 1;
+            }
+
+            // Paginar localmente
+            $offset = ($page - 1) * $limit;
+            $pagedList = array_slice($filteredList, $offset, $limit);
+            $paged_count = count($pagedList);
 
             // Formatear respuesta
             $prizes = array_map(function($prize) {
@@ -80,11 +103,10 @@ class AwardController extends Controller
                     'name' => $prize['name'] ?? '',
                     'points' => $prize['points'] ?? 0,
                     'image' => $prize['pathImageAbsolute'] ?? '',
+                    'moneyValue' => $prize['moneyValue'] ?? 0,
                     'description' => $prize['description'] ?? '',
                 ];
-            }, $prizeList);
-
-            Log::info($prizes);
+            }, $pagedList);
 
             return response()->json([
                 'success' => true,
@@ -92,8 +114,8 @@ class AwardController extends Controller
                 'pagination' => [
                     'current_page' => $page,
                     'per_page' => $limit,
-                    'total' => $total,
-                    'total_pages' => ceil($total / $limit),
+                    'total' => $filtered_count,
+                    'total_pages' => $total_pages,
                 ]
             ]);
 

@@ -1,7 +1,6 @@
 <template>
     <div>
         <Header />
-
         <div class="login-page">
             <div class="login-container">
                 <div class="login-card">
@@ -9,37 +8,63 @@
                         <img :src="logoConecta" class="login-logo" alt="Logo Conecta" />
                     </div>
 
-                    <div v-if="generalError" class="alert alert--error">
-                        {{ generalError }}
-                    </div>
-
                     <form @submit.prevent="handleSubmit" class="login-form">
-                        <TextInput id="email" v-model="form.email" type="email" label="Correo electrónico"
-                            placeholder="ejemplo@correo.com" :error="errors.email" :disabled="loading" required
-                            @blur="validateField('email')" />
+                        <TextInput
+                            id="email"
+                            v-model="form.email"
+                            type="email"
+                            label="Correo electrónico"
+                            placeholder="ejemplo@correo.com"
+                            :error="errors.email"
+                            :disabled="loading"
+                            required
+                            @blur="validateField('email')"
+                        />
 
-                        <TextInput id="password" v-model="form.password" type="password" label="Contraseña"
-                            placeholder="Ingresa tu contraseña" :error="errors.password" :disabled="loading"
-                            :show-toggle="true" required @blur="validateField('password')" />
+                        <TextInput
+                            id="password"
+                            v-model="form.password"
+                            type="password"
+                            label="Contraseña"
+                            placeholder="Ingresa tu contraseña"
+                            :error="errors.password"
+                            :disabled="loading"
+                            :show-toggle="true"
+                            required
+                            @blur="validateField('password')"
+                        />
 
                         <div class="forgot-password">
-                            <p class="forgot-password"><a href="#">Olvidaste tu contraseña</a></p>
-                        </div>
-                        <div class="login-footer">
-                            <p class="help"><a href="#">¿Necesitas ayuda?</a></p>
+                            <a href="#">Olvidaste tu contraseña</a>
                         </div>
 
-                        <Button type="submit" variant="primary" :loading="loading" :disabled="loading"
-                            track-name="login_submit" class="login-submit">
+                        <div class="help">
+                            <a href="#">¿Necesitas ayuda?</a>
+                        </div>
+
+                        <!-- El error aparece aquí, dentro del formulario -->
+                        <div v-if="generalError" class="login-alert">
+                            <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                            {{ generalError }}
+                        </div>
+
+                        <Button
+                            type="submit"
+                            variant="primary"
+                            :loading="loading"
+                            :disabled="loading"
+                            track-name="login_submit"
+                            class="login-submit"
+                        >
                             Continuar
                         </Button>
                     </form>
-
                 </div>
             </div>
         </div>
         <Footer />
-
     </div>
 </template>
 
@@ -58,7 +83,6 @@ import Footer from '../Layouts/Footer.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
-
 const loading = ref(false);
 const generalError = ref('');
 
@@ -87,12 +111,14 @@ function validateField(field) {
 function validateForm() {
     errors.email = validateEmail(form.email);
     errors.password = validatePassword(form.password);
-
     return !errors.email && !errors.password;
 }
 
 async function handleSubmit() {
+
     generalError.value = '';
+    errors.email = '';
+    errors.password = '';
 
     if (!validateForm()) {
         return;
@@ -112,9 +138,30 @@ async function handleSubmit() {
     } catch (error) {
         console.error('Login error:', error);
 
-        if (error.response?.data?.message) {
+        if (error.response?.status === 422 && error.response?.data?.errors) {
+            const validationErrors = error.response.data.errors;
+
+            if (validationErrors.email) {
+                errors.email = ' ';
+            }
+
+            if (validationErrors.password) {
+                errors.password = ' ';
+            }
+
+            if (validationErrors.password) {
+                generalError.value = validationErrors.password[0];
+            } else if (validationErrors.email) {
+                generalError.value = validationErrors.email[0];
+            }
+        }
+        else if (error.response?.status === 401) {
+            generalError.value = error.response?.data?.message || 'Credenciales incorrectas';
+        }
+        else if (error.response?.data?.message) {
             generalError.value = error.response.data.message;
-        } else {
+        }
+        else {
             generalError.value = 'Error al conectar con el servidor. Intenta nuevamente.';
         }
     } finally {

@@ -22,9 +22,12 @@
 
     <!-- Scripts & Styles -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+
+
 </head>
 <body>
     <!-- Vue App Mount Point -->
+
     <div id="app"></div>
 
 </body>

@@ -24,17 +24,12 @@
           <h3 class="alianza-card__title">{{ alianza.nombre }}</h3>
           <p class="alianza-card__description">{{ alianza.descripcion }}</p>
 
-          <details v-if="alianza.terminos_condiciones" class="alianza-card__terms">
-            <summary>Términos y condiciones</summary>
-            <p>{{ alianza.terminos_condiciones }}</p>
-          </details>
-
           <Button
             variant="primary"
             class="alianza-card__btn"
             @click="handleObtener"
           >
-            Obtener Alianza
+            OBTENER ALIANZA
           </Button>
         </div>
       </div>

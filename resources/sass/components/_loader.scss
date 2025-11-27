@@ -1,7 +1,14 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
 .loader {
   @include flex-center;
   flex-direction: column;
-  padding: $spacing-2xl;
+  padding: $spacing-lg;
+
+  @include respond-to(tablet) {
+    padding: $spacing-2xl;
+  }
 
   &--overlay {
     position: fixed;
@@ -11,20 +18,43 @@
     bottom: 0;
     background: rgba(white, 0.9);
     z-index: $z-modal;
+    backdrop-filter: blur(2px);
   }
 }
 
 .loader__spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid $color-border;
+  width: 40px;
+  height: 40px;
+  border: 3px solid $color-border;
   border-top-color: $color-primary;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
+
+  @include respond-to(tablet) {
+    width: 48px;
+    height: 48px;
+    border-width: 4px;
+  }
 }
 
 .loader__message {
   margin-top: $spacing-md;
-  color: $color-text-white;
-  font-size: 0.875rem;
+  color: $color-text;
+  font-size: 0.813rem;
+  text-align: center;
+  font-weight: 700;
+
+  @include respond-to(tablet) {
+    font-size: 1.2rem;
+  }
+}
+
+// Animación del spinner
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

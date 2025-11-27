@@ -1,45 +1,93 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
 .header {
-    background   : white;
+    background: white;
     border-bottom: 2px solid $color-border;
-    position     : sticky;
-    top          : 0;
-    z-index      : $z-sticky;
-    box-shadow   : $shadow-sm;
-    height       : 70px;
-    display      : flex;
-    align-items  : center;
-    padding      : 0;
+    position: sticky;
+    top: 0;
+    z-index: $z-sticky;
+    box-shadow: $shadow-sm;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    padding: 0;
 }
 
 .header__container {
-    width       : 100%;
-    max-width   : 1920px;
-    margin      : 0 auto;
+    width: 100%;
+    max-width: 1920px;
+    margin: 0 auto;
     padding-left: 20px;
-    height      : 100%;
-    display     : flex;
-    align-items : center;
-    gap         : $spacing-lg;
+    padding-right: 5px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
 }
 
 /* LOGO */
 .header__logo {
-    width      : 140px;
-    height     : auto;
-    margin     : 0;
+    width: 140px;
+    height: auto;
+    margin: 0;
     flex-shrink: 0;
 
     a {
-        display    : flex;
+        display: flex;
         align-items: center;
-        gap        : $spacing-sm;
+        gap: $spacing-sm;
+    }
+
+    img {
+        width: 100%;
+        height: auto;
     }
 }
 
-/* NAV */
+/* BOTÓN HAMBURGUESA - SOLO MÓVIL/TABLET */
+.header__hamburger {
+    display: none;
+
+    @include tablet-and-mobile {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 28px;
+        height: 24px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        margin-left: auto;
+        z-index: 1001;
+
+        span {
+            width: 100%;
+            height: 3px;
+            background-color: $color-primary;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        &--open {
+            span:nth-child(1) {
+                transform: rotate(45deg) translate(7px, 7px);
+            }
+            span:nth-child(2) {
+                opacity: 0;
+            }
+            span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -7px);
+            }
+        }
+    }
+}
+
+/* NAV - DESKTOP normal, MÓVIL lateral */
 .header__nav {
-    display    : flex;
-    height     : 100%;
+    display: flex;
+    height: 100%;
     margin-left: auto;
 
     &:first-of-type {
@@ -49,100 +97,240 @@
     &:not(:first-of-type) {
         margin-left: 0;
     }
+
+    @include tablet-and-mobile {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 300px;
+        height: 100vh;
+        background: white;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        padding: 90px 0 20px;
+        box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease-in-out;
+        z-index: 1000;
+        overflow-y: auto;
+        margin-left: 0;
+
+        &--open {
+            right: 0;
+        }
+    }
+
+    @include mobile-only {
+        width: 100%;
+    }
 }
 
-/* LINKS */
+/* LINKS - DESKTOP normal, MÓVIL vertical */
 .header__nav-link {
-    height     : 100%;
-    display    : flex;
+    height: 100%;
+    display: flex;
     align-items: center;
-    gap        : $spacing-sm;
+    gap: $spacing-sm;
     font-weight: 500;
-    color      : $color-primary;
-    padding    : 0 $spacing-lg;
-    transition : background-color $transition-fast, color $transition-fast;
+    color: $color-primary;
+    padding: 0 $spacing-lg;
+    transition: background-color $transition-fast, color $transition-fast;
 
     img {
-        width     : 20px;
-        height    : 20px;
+        width: 20px;
+        height: 20px;
         transition: opacity $transition-fast;
     }
 
     &:hover {
         background-color: $color-secondary;
-        color           : $color-text-white
+        color: $color-text-white;
+    }
+
+    &.active {
+        background-color: $color-primary;
+        color: white;
+    }
+
+    @include tablet-and-mobile {
+        height: auto;
+        width: 100%;
+        padding: 18px 24px;
+        border-bottom: 1px solid $color-border;
+
+        &:last-child {
+            border-bottom: none;
+        }
     }
 }
 
-/* LINK ACTIVO */
-.header__nav-link.active {
-    background-color: $color-primary;
-    color           : white;
-}
-
-/* USER INFO */
+/* USER INFO - DESKTOP visible */
 .header__user {
-    display     : flex;
-    align-items : center;
-    gap         : $spacing-md;
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
     margin-right: $spacing-xl;
+
+    @include tablet-and-mobile {
+        display: none;
+    }
 }
 
 .header__username {
-    display  : none;
     font-size: 0.875rem;
-    color    : $color-primary;
-
-    @include respond-to(tablet) {
-        display: block;
-    }
+    color: $color-primary;
 }
 
 .header__logout {
-    padding      : $spacing-sm $spacing-md;
-    background   : $color-text-gray-01;
-    color        : $color-text;
+    padding: $spacing-sm $spacing-md;
+    background: $color-text-gray-01;
+    color: $color-text;
     border-radius: $radius-md;
-    font-size    : 0.875rem;
-    font-weight  : 500;
-    transition   : all $transition-fast;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all $transition-fast;
 
     &:hover {
         background: $color-primary;
-        color     : white;
+        color: white;
     }
 }
 
+/* NAV SECUNDARIO - DESKTOP normal */
 .nav-second {
-    background   : white;
+    background: white;
     border-bottom: 1px solid $color-border;
-    position     : sticky;
-    top          : 0;
-    z-index      : $z-sticky;
-    box-shadow   : $shadow-sm;
-    height       : 70px;
-    display      : flex;
-    align-items  : center;
-    padding      : 0;
+    position: sticky;
+    top: 70px;
+    z-index: calc($z-sticky - 1);
+    box-shadow: $shadow-sm;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    padding: 0;
+
+    @include tablet-and-mobile {
+        height: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px 20px;
+    }
+}
+
+/* HAMBURGUESA NAV SECUNDARIO - SOLO MÓVIL */
+.nav-second__hamburger {
+    display: none;
+
+    @include tablet-and-mobile {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 24px;
+        height: 20px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+
+        span {
+            width: 100%;
+            height: 2.5px;
+            background-color: $color-primary;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        &--open {
+            span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+            span:nth-child(2) {
+                opacity: 0;
+            }
+            span:nth-child(3) {
+                transform: rotate(-45deg) translate(6px, -6px);
+            }
+        }
+    }
+}
+
+.nav-second__links {
+    display: flex;
+    height: 100%;
+
+    @include tablet-and-mobile {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 15px;
+        gap: 0;
+
+        &--open {
+            display: flex;
+        }
+    }
 }
 
 .nav-link-second {
-    height     : 100%;
-    display    : flex;
+    height: 100%;
+    display: flex;
     align-items: center;
-    gap        : $spacing-sm;
+    gap: $spacing-sm;
     font-weight: 500;
-    color      : $color-primary;
-    padding    : 0 $spacing-xl;
-    transition : background-color $transition-fast, color $transition-fast;
+    color: $color-primary;
+    padding: 0 $spacing-xl;
+    transition: background-color $transition-fast, color $transition-fast;
+
     &:hover {
         background-color: $color-secondary;
-        color           : $color-text-white
+        color: $color-text-white;
+    }
+
+    &.active {
+        background-color: $color-primary;
+        color: white;
+    }
+
+    @include tablet-and-mobile {
+        height: auto;
+        padding: 15px 20px;
+        border-radius: $radius-md;
+        margin: 3px 0;
+
+        &:hover {
+            background-color: rgba($color-secondary, 0.1);
+            color: $color-primary;
+        }
+
+        &.active {
+            background-color: $color-primary;
+            color: white;
+        }
     }
 }
 
+/* OVERLAY - SOLO MÓVIL */
+.menu-overlay {
+    display: none;
 
-.nav-link-second.active {
-    background-color: $color-primary;
-    color           : white;
+    @include tablet-and-mobile {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        animation: fadeIn 0.3s ease;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }

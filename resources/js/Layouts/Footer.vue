@@ -24,18 +24,27 @@
                 </div>
             </div>
 
+            <!-- CENTRO: REDES SOCIALES -->
             <div class="footer__icons">
                 <p class="footer__text">Síguenos en:</p>
                 <div class="icon-row">
-                    <a href="#"><img :src="logoFacebook" class="logo" alt="Facebook" /></a>
-                    <a href="#"><img :src="logoLinkedin" class="logo" alt="Linkedin" /></a>
-                    <a href="#"><img :src="logoYoutube" class="logo" alt="Youtube" /></a>
+                    <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                        <img :src="logoFacebook" class="logo" alt="Facebook" />
+                    </a>
+                    <a href="#" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                        <img :src="logoLinkedin" class="logo" alt="LinkedIn" />
+                    </a>
+                    <a href="#" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                        <img :src="logoYoutube" class="logo" alt="YouTube" />
+                    </a>
                 </div>
             </div>
 
-
+            <!-- DERECHA: AYUDA (FLOTANTE) -->
             <div class="footer__help">
-                <a href="#"><img :src="logoHelp" class="logo-help" alt="Ayuda" /></a>
+                <a href="#" aria-label="Ayuda">
+                    <img :src="logoHelp" class="logo-help" alt="¿Necesitas ayuda?" />
+                </a>
             </div>
 
         </div>
@@ -52,3 +61,8 @@ import logoHelp from '../../images/Iconos/btn-ayuda.png'
 
 const currentYear = computed(() => new Date().getFullYear());
 </script>
+
+
+<style lang="scss" scoped>
+
+</style>

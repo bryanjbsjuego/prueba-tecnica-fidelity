@@ -4,12 +4,13 @@
 
         <main class="page__content">
             <div>
-                <img :src="bannerAlliance"></img>
+                <img :src="bannerAlliance" alt="Banner Alianzas" />
             </div>
             <div class="container">
                 <div class="page-header">
                     <h1 class="page-title">Alianzas</h1>
-                    <p class="page-subtitle">Con las Alianzas Conecta encontrarás mútiples opciones para cada momento de tu vida. Podrás: hacer, comprar, ir y saber. ¡Descrúbrelas y disfruta!</p>
+                    <p class="page-subtitle">Con las Alianzas Conecta encontrarás múltiples opciones para cada momento
+                        de tu vida. Podrás: hacer, comprar, ir y saber. ¡Descúbrelas y disfruta!</p>
                 </div>
 
                 <Loader v-if="loading" overlay message="Cargando alianzas..." />
@@ -18,32 +19,37 @@
                     {{ error }}
                 </div>
 
-                <div v-else-if="alianzas.length === 0" class="empty-state">
+                <div v-else-if="alliances.length === 0" class="empty-state">
                     <p>No hay alianzas disponibles para tu categoría</p>
                 </div>
 
                 <div v-else class="alianzas-grid">
-                    <AllianceCard v-for="alianza in alianzas" :key="alianza.alianza_id" :alianza="alianza"
-                        @obtener="handleObtenerAlianza" />
+                    <AllianceCard v-for="alliance in alliances" :key="alliance.alianza_id" :alianza="alliance"
+                        @obtener="handleGetAlliance" />
                 </div>
-                <Pagination v-if="pagination.total_pages > 1" :current-page="pagination.current_page"
-                    :total-pages="pagination.total_pages" @change="handlePageChange" />
+
+                <Pagination v-if="pagination.totalPages > 1" :current-page="pagination.currentPage"
+                    :total-pages="pagination.totalPages" @change="handlePageChange" />
             </div>
         </main>
 
         <Footer />
 
-        <Modal v-model="showSuccessModal" title="¡Alianza Obtenida!" :show-close="true" @close="handleModalClose">
+        <Modal v-model="showSuccessModal" title="Alianza Obtenida" :show-close="true" @close="handleModalClose">
             <div class="success-message">
-                <div class="success-icon">✓</div>
+
                 <p class="success-text">
-                    Has obtenido exitosamente la alianza:<br>
-                    <strong>{{ obtainedAlianza?.nombre }}</strong>
+                    <strong>{{ obtainedAlliance?.nombre }}</strong>
                 </p>
                 <p class="success-description">
-                    {{ obtainedAlianza?.descripcion }}
+                    {{ obtainedAlliance?.descripcion }}
                 </p>
             </div>
+            <template #footer>
+                <Button variant="primary" @click="handleModalClose">
+                    Cerrar
+                </Button>
+            </template>
         </Modal>
     </div>
 </template>
@@ -60,155 +66,177 @@ import AllianceCard from '../components/AllianceCard.vue';
 import Pagination from '../components/Pagination.vue';
 import Modal from '../components/Modal.vue';
 import Loader from '../components/Loader.vue';
-import bannerAlliance from '../../images/Banners/banner-alianza.jpg.jpg'
+import bannerAlliance from '../../images/Banners/banner-alianza.jpg.jpg';
+import Swal from 'sweetalert2';
+import Button from '../components/Button.vue';
 
 const authStore = useAuthStore();
 
 const loading = ref(false);
 const error = ref('');
-const alianzas = ref([]);
+const alliances = ref([]);
 const showSuccessModal = ref(false);
-const obtainedAlianza = ref(null);
+const obtainedAlliance = ref(null);
 
 const pagination = reactive({
-    current_page: 1,
-    per_page: 6,
+    currentPage: 1,
+    perPage: 6,
     total: 0,
-    total_pages: 0
+    totalPages: 0
 });
 
 
-// Credenciales predefinidas del operador (backend interno)
 const OPERATOR_CREDENTIALS = {
-  usuario: 'operador1',
-  contrasena: 'Password123'
+    username: 'operador1',
+    password: 'Password123'
 };
 
-// Obtener categoría del cliente desde customer data
-const categoriaClienteId = computed(() => {
+const customerCategoryId = computed(() => {
     return authStore.customer?.category || 1;
 });
 
 onMounted(async () => {
-  trackPageView('Alianzas', window.location.pathname);
+    trackPageView('Alianzas', window.location.pathname);
 
-  // Auto-login de operador si no existe
-  await ensureOperatorSession();
+    await ensureOperatorSession();
 
-  // Cargar alianzas
-  await loadAlianzas(); // ← Agregar await aquí también
+    await loadAlliances();
 });
 
-/**
- * Asegurar que existe una sesión de operador válida
- */
+
 async function ensureOperatorSession() {
-  // Si ya existe sesión de operador, no hacer nada
-  if (authStore.operatorUuid && authStore.operatorToken) {
-    return;
-  }
-
-  try {
-
-    const response = await operatorLogin(
-      OPERATOR_CREDENTIALS.usuario,
-      OPERATOR_CREDENTIALS.contrasena
-    );
-
-    if (response.success) {
-      // Guardar en store
-      authStore.setOperatorSession(
-        response.token,
-        response.uuid,
-        response.operador
-      );
-    } else {
-      console.error('❌ Login falló:', response);
-      throw new Error('Login no exitoso');
+    if (authStore.operatorUuid && authStore.operatorToken) {
+        return;
     }
-  } catch (err) {
-    console.error('❌ Error al iniciar sesión de operador:', err);
-    error.value = 'Error al conectar con el servicio de alianzas';
-  }
+
+    try {
+        const response = await operatorLogin(
+            OPERATOR_CREDENTIALS.username,
+            OPERATOR_CREDENTIALS.password
+        );
+
+        if (response.success) {
+
+            authStore.setOperatorSession(
+                response.token,
+                response.uuid,
+                response.operador
+            );
+        } else {
+            console.error(' Login failed:', response);
+            throw new Error('Login not successful');
+        }
+    } catch (err) {
+        console.error('Error logging in operator:', err);
+        error.value = 'Error al conectar con el servicio de alianzas';
+    }
 }
 
-async function loadAlianzas() {
-  loading.value = true;
-  error.value = '';
+async function loadAlliances() {
+    loading.value = true;
+    error.value = '';
 
-  try {
-    const response = await getAlliances(
-      authStore.operatorUuid,
-      categoriaClienteId.value,
-      pagination.current_page,
-      pagination.per_page
-    );
+    try {
+        const response = await getAlliances(
+            authStore.operatorUuid,
+            customerCategoryId.value,
+            pagination.currentPage,
+            pagination.perPage
+        );
 
-    if (response.success) {
-      alianzas.value = response.alianzas;
-      Object.assign(pagination, response.pagination);
-    } else {
-      error.value = 'Error al cargar las alianzas';
+        if (response.success) {
+            alliances.value = response.alianzas;
+
+
+            pagination.currentPage = response.pagination.current_page;
+            pagination.perPage = response.pagination.per_page;
+            pagination.total = response.pagination.total;
+            pagination.totalPages = response.pagination.total_pages;
+        } else {
+            error.value = 'Error al cargar las alianzas';
+        }
+    } catch (err) {
+        console.error('Load alliances error:', err);
+
+        if (err.response?.status === 401) {
+
+            await ensureOperatorSession();
+
+            await loadAlliances();
+            return;
+        } else {
+            error.value = 'Error al conectar con el servidor';
+        }
+    } finally {
+        loading.value = false;
     }
-  } catch (err) {
-    console.error('Load alianzas error:', err);
-
-    if (err.response?.status === 401) {
-      // Token expiró, intentar re-login
-      await ensureOperatorSession();
-      // Reintentar carga CON AWAIT
-      await loadAlianzas();  // ✅ AGREGAR AWAIT
-      return; // ← Importante: salir para evitar el finally
-    } else {
-      error.value = 'Error al conectar con el servidor';
-    }
-  } finally {
-    loading.value = false;
-  }
 }
 
-async function handleObtenerAlianza(alianza) {
-    trackCTAClick(`obtener_alianza_${alianza.nombre}`, 'alianzas');
+async function handleGetAlliance(alliance) {
+
+
+    trackCTAClick(`obtener_alianza_${alliance.nombre}`, 'alianzas');
 
     try {
         const uuid = authStore.operatorUuid || 'demo-uuid';
 
-        const response = await usedWingAlliance(uuid, alianza.id);
+        const allianceId = alliance.alianza_id || alliance.id;
+
+        if (!allianceId) {
+            Swal.fire({
+                title: '',
+                text: '¡No se pudo identificar la alianza!',
+                icon: 'info'
+            });
+            return;
+        }
+
+
+        const response = await usedWingAlliance(uuid, allianceId);
 
         if (response.success) {
-            trackSuccessRedeem(alianza.nombre, 'alianza');
+            trackSuccessRedeem(alliance.nombre, 'alianza');
 
-            // Remover alianza de la lista
-            alianzas.value = alianzas.value.filter(a => a.id !== alianza.id);
 
-            // Mostrar modal de éxito
-            obtainedAlianza.value = alianza;
+            alliances.value = alliances.value.filter(a =>
+                (a.alianza_id || a.id) !== allianceId
+            );
+
+            obtainedAlliance.value = alliance;
             showSuccessModal.value = true;
 
-            // Si la lista queda vacía, recargar
-            if (alianzas.value.length === 0 && pagination.current_page > 1) {
-                pagination.current_page--;
-                loadAlianzas();
+
+            if (alliances.value.length === 0 && pagination.currentPage > 1) {
+                pagination.currentPage--;
+                loadAlliances();
             }
         } else {
-            trackErrorRedeem(alianza.nombre, 'alianza', response.message);
-            alert('Error al obtener la alianza: ' + response.message);
+            trackErrorRedeem(alliance.nombre, 'alianza', response.message);
+            Swal.fire({
+                title: '',
+                text: `Error al obtener la alianza: ${response.message}`,
+                icon: 'info'
+            });
         }
     } catch (err) {
-        console.error('Obtener alianza error:', err);
-        trackErrorRedeem(alianza.nombre, 'alianza', 'Error de conexión');
-        alert('Error al obtener la alianza. Intenta nuevamente.');
+        console.error('Get alliance error:', err);
+        trackErrorRedeem(alliance.nombre, 'alianza', 'Error de conexión');
+        Swal.fire({
+            title: '',
+            text: 'Error al obtener la alianza. Intenta nuevamente.',
+            icon: 'info'
+        });
     }
 }
 
 function handlePageChange(page) {
-    pagination.current_page = page;
-    loadAlianzas();
+    pagination.currentPage = page;
+    loadAlliances();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function handleModalClose() {
     showSuccessModal.value = false;
-    obtainedAlianza.value = null;
+    obtainedAlliance.value = null;
 }
 </script>

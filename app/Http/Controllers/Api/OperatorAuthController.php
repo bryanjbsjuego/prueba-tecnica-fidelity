@@ -4,62 +4,45 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginFormRequestApi;
-use App\Models\Operator;
-use App\Models\SesionApi;
+use App\Http\Resources\OperatorResource;
+use App\Services\OperatorAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Exception;
 
 class OperatorAuthController extends Controller
 {
+    private OperatorAuthService $authService;
+
+    public function __construct(OperatorAuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     public function login(LoginFormRequestApi $request): JsonResponse
     {
         try {
-            $operator = Operator::where('usuario', $request->usuario)
-                ->actives()
-                ->with('program')
-                ->first();
-
-            if (!$operator) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Credenciales inválidas'
-                ], 401);
-            }
-
-            if (!$operator->verifyPassword($request->contrasena)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Credenciales inválidas'
-                ], 401);
-            }
-
-            // Generar token JWT
-            $token = JWTAuth::fromUser($operator);
-
-            // Crear sesión
-            $sesion = SesionApi::createSession($operator, $token, 60);
+            $result = $this->authService->attempt($request->usuario, $request->contrasena);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Autenticación exitosa',
-                'uuid' => $sesion->uuid,
-                'token' => $token,
-                'operador' => [
-                    'id' => $operator->operador_id,
-                    'usuario' => $operator->usuario,
-                    'programa' => $operator->program->programa_id,
-                ]
+                'uuid' => $result['session']->uuid,
+                'token' => $result['token'],
+                'operador' => new OperatorResource($result['operator']),
             ]);
-
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Operator login error: ' . $e->getMessage());
+
+            $status = $e->getCode() === 401 ? 401 : 500;
+            $message = $e->getCode() === 401 ? 'Credenciales inválidas' : 'Error en el proceso de autenticación';
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error en el proceso de autenticación'
-            ], 500);
+                'message' => $message
+            ], $status);
         }
     }
 
@@ -68,19 +51,18 @@ class OperatorAuthController extends Controller
         try {
             $uuid = $request->input('uuid');
 
-            if ($uuid) {
-                $sesion = SesionApi::where('uuid', $uuid)->first();
-                $sesion?->invalidate();
-            }
+            $tokenObj = JWTAuth::getToken();
+            $tokenString = $tokenObj ? (string)$tokenObj : null;
 
-            JWTAuth::invalidate(JWTAuth::getToken());
+            $this->authService->logout($uuid, $tokenString);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Sesión cerrada correctamente'
             ]);
+        } catch (Exception $e) {
+            Log::error('Operator logout error: ' . $e->getMessage());
 
-        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al cerrar sesión'

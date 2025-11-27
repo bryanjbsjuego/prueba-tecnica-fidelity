@@ -54,7 +54,7 @@ const router = createRouter({
   }
 });
 
-// Guard de navegación
+
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
   const requiresAuth = to.meta.requiresAuth;

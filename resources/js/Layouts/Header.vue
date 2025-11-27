@@ -5,45 +5,92 @@
             <!-- LOGO -->
             <div class="header__logo">
                 <router-link to="/">
-                    <img :src="logoConecta" />
+                    <img :src="logoConecta" alt="Logo Conecta" />
                 </router-link>
             </div>
 
+            <!-- BOTÓN HAMBURGUESA (solo visible en móvil/tablet) -->
+            <button
+                class="header__hamburger"
+                :class="{ 'header__hamburger--open': isMenuOpen }"
+                @click="toggleMenu"
+                aria-label="Abrir menú"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
             <!-- NAV PRINCIPAL (tel, registrar, login) -->
-            <nav v-if="!isAuthenticated" class="header__nav">
-                <a href="tel:9999999999" class="header__nav-link" :class="{ active: isActive('') }"
-                    @mouseenter="isHovered.phone = true" @mouseleave="isHovered.phone = false">
-                    <img :src="isActive('') || isHovered.phone ? iconoPhoneWhite : iconoPhoneColor" />
+            <nav
+                v-if="!isAuthenticated"
+                class="header__nav"
+                :class="{ 'header__nav--open': isMenuOpen }"
+            >
+                <a
+                    href="tel:9999999999"
+                    class="header__nav-link"
+                    :class="{ active: isActive('') }"
+                    @mouseenter="isHovered.phone = true"
+                    @mouseleave="isHovered.phone = false"
+                    @click="closeMenu"
+                >
+                    <img :src="isActive('') || isHovered.phone ? iconoPhoneWhite : iconoPhoneColor" alt="Teléfono" />
                     999 999 9999
                 </a>
 
-                <router-link to="/registro" class="header__nav-link" :class="{ active: isActive('/registro') }"
-                    @mouseenter="isHovered.register = true" @mouseleave="isHovered.register = false">
-                    <img :src="isActive('/registro') || isHovered.register ? iconoPlusWhite : iconoPlusColor" />
+                <router-link
+                    to="/registro"
+                    class="header__nav-link"
+                    :class="{ active: isActive('/registro') }"
+                    @mouseenter="isHovered.register = true"
+                    @mouseleave="isHovered.register = false"
+                    @click="closeMenu"
+                >
+                    <img :src="isActive('/registro') || isHovered.register ? iconoPlusWhite : iconoPlusColor" alt="Registrarse" />
                     Regístrate
                 </router-link>
 
-                <router-link to="/login" class="header__nav-link" :class="{ active: isActive('/login') }"
-                    @mouseenter="isHovered.login = true" @mouseleave="isHovered.login = false">
-                    <img :src="isActive('/login') || isHovered.login ? iconoLoginWhite : iconoLoginColor" />
+                <router-link
+                    to="/login"
+                    class="header__nav-link"
+                    :class="{ active: isActive('/login') }"
+                    @mouseenter="isHovered.login = true"
+                    @mouseleave="isHovered.login = false"
+                    @click="closeMenu"
+                >
+                    <img :src="isActive('/login') || isHovered.login ? iconoLoginWhite : iconoLoginColor" alt="Iniciar sesión" />
                     Inicia sesión
                 </router-link>
             </nav>
 
             <!-- NAV PARA USUARIOS LOGUEADOS -->
-            <nav v-if="isAuthenticated" class="header__nav">
-                <a href="tel:9999999999" class="header__nav-link" :class="{ active: isActive('') }"
-                    @mouseenter="isHovered.phone = true" @mouseleave="isHovered.phone = false">
-                    <img :src="isActive('') || isHovered.phone ? iconoPhoneWhite : iconoPhoneColor" />
+            <nav
+                v-if="isAuthenticated"
+                class="header__nav"
+                :class="{ 'header__nav--open': isMenuOpen }"
+            >
+                <a
+                    href="tel:9999999999"
+                    class="header__nav-link"
+                    :class="{ active: isActive('') }"
+                    @mouseenter="isHovered.phone = true"
+                    @mouseleave="isHovered.phone = false"
+                    @click="closeMenu"
+                >
+                    <img :src="isActive('') || isHovered.phone ? iconoPhoneWhite : iconoPhoneColor" alt="Teléfono" />
                     999 999 9999
                 </a>
 
-                <a class="header__nav-link" @click="handleLogout()" :class="{ active: isActive('') }" @mouseenter="isHovered.login = true"
-                    @mouseleave="isHovered.login = false">
-                    <img :src="isActive('/login') || isHovered.login ? iconoLoginWhite : iconoLoginColor">
+                <a
+                    class="header__nav-link"
+                    @click="handleLogout"
+                    @mouseenter="isHovered.login = true"
+                    @mouseleave="isHovered.login = false"
+                >
+                    <img :src="isHovered.login ? iconoLoginWhite : iconoLoginColor" alt="Salir">
                     Salir
                 </a>
-
             </nav>
 
             <div v-if="customer" class="header__user">
@@ -54,24 +101,61 @@
 
         </div>
     </header>
-    <div>
-        <nav v-if="isAuthenticated" class="nav-second">
-            <router-link to="/home" class="nav-link-second" :class="{ active: isActive('/home') }">
-                Inicio
-            </router-link>
-            <router-link to="/catalogo-premios" class="nav-link-second" :class="{ active: isActive('/catalogo-premios') }">
-                Catálogo de Premios
-            </router-link>
 
-            <router-link to="/alianzas" class="nav-link-second" :class="{ active: isActive('/alianzas') }">
-                Alianzas
-            </router-link>
+    <!-- NAV SECUNDARIO (para usuarios logueados) -->
+    <div v-if="isAuthenticated">
+        <nav class="nav-second">
+            <!-- Hamburguesa del nav secundario (solo móvil) -->
+            <button
+                class="nav-second__hamburger"
+                :class="{ 'nav-second__hamburger--open': isSecondMenuOpen }"
+                @click="toggleSecondMenu"
+                aria-label="Abrir menú de navegación"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav-second__links" :class="{ 'nav-second__links--open': isSecondMenuOpen }">
+                <router-link
+                    to="/home"
+                    class="nav-link-second"
+                    :class="{ active: isActive('/home') }"
+                    @click="closeSecondMenu"
+                >
+                    Inicio
+                </router-link>
+                <router-link
+                    to="/catalogo-premios"
+                    class="nav-link-second"
+                    :class="{ active: isActive('/catalogo-premios') }"
+                    @click="closeSecondMenu"
+                >
+                    Catálogo de Premios
+                </router-link>
+                <router-link
+                    to="/alianzas"
+                    class="nav-link-second"
+                    :class="{ active: isActive('/alianzas') }"
+                    @click="closeSecondMenu"
+                >
+                    Alianzas
+                </router-link>
+            </div>
         </nav>
     </div>
+
+    <!-- Overlay para cerrar menú al hacer clic fuera (solo móvil) -->
+    <div
+        v-if="isMenuOpen || isSecondMenuOpen"
+        class="menu-overlay"
+        @click="closeAllMenus"
+    ></div>
 </template>
 
 <script setup>
-import { computed, reactive } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../utils/auth';
 
@@ -83,13 +167,15 @@ import iconoPlusWhite from '../../images/Iconos/registro-blanco.png';
 import iconoLoginColor from '../../images/Iconos/log-color.png';
 import iconoLoginWhite from '../../images/Iconos/log-blanco.png';
 
-
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 const customer = computed(() => authStore.customer);
+
+const isMenuOpen = ref(false);
+const isSecondMenuOpen = ref(false);
 
 const isHovered = reactive({
     phone: false,
@@ -102,8 +188,37 @@ const isHovered = reactive({
 
 const isActive = (path) => route.path === path;
 
+function toggleMenu() {
+    isMenuOpen.value = !isMenuOpen.value;
+
+    if (isMenuOpen.value) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    }
+}
+
+function toggleSecondMenu() {
+    isSecondMenuOpen.value = !isSecondMenuOpen.value;
+}
+
+function closeMenu() {
+    isMenuOpen.value = false;
+    document.body.style.overflow = '';
+}
+
+function closeSecondMenu() {
+    isSecondMenuOpen.value = false;
+}
+
+function closeAllMenus() {
+    closeMenu();
+    closeSecondMenu();
+}
+
 function handleLogout() {
     authStore.clearSession();
+    closeAllMenus();
     router.push('/login');
 }
 </script>

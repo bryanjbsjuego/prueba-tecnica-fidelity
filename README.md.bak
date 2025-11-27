@@ -23,7 +23,7 @@ Sistema web de autenticación y gestión de recompensas con integración a Web S
 
 ## Instalación
 
-### 1. Clonar el repositorio en tu carpeta www de (laragon o xampp)
+### 1. Clonar el repositorio
 
 ```bash
 git clone https://github.com/bryanjbsjuego/prueba-tecnica-fidelity.git
@@ -563,7 +563,7 @@ Authorization: Bearer [TOKEN_JWT]
 
 ---
 
-## Solución de problemas
+## Troubleshooting
 
 ### Error 401 en /premios
 

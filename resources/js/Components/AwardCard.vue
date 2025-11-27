@@ -6,6 +6,7 @@
 
     <div class="premio-card__body">
       <h3 class="premio-card__title">{{ premio.name }}</h3>
+      <h3 class="premio-card__title">{{ formatMoney(premio.moneyValue) }} MXN</h3>
       <p class="premio-card__points">{{ premio.points }} puntos</p>
     </div>
 
@@ -29,4 +30,12 @@ defineProps({
 });
 
 defineEmits(['ver-mas']);
+
+function formatMoney(value) {
+  return new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+  }).format(value);
+}
+
 </script>

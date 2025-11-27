@@ -1,43 +1,61 @@
+@use '../abstracts/variables' as *;
+
 .input-group {
-  margin-bottom: $spacing-lg;
+  margin-bottom: $spacing-md;
 }
 
 .input-label {
   display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: $spacing-sm;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: $spacing-xs;
   color: $color-text;
+  transition: color $transition-fast;
 
   &__required {
     color: $color-primary;
     margin-left: $spacing-xs;
   }
+
+  // Label en color primary cuando hay error
+  &--error {
+    color: $color-primary;
+  }
 }
 
 .input-wrapper {
   position: relative;
+  width: 100%;
 }
 
 .input-field {
   width: 100%;
-  padding: $spacing-sm $spacing-md;
-  font-size: 1rem;
-  border: 2px solid $color-border;
-  border-radius: $radius-md;
+  padding: 0.625rem 1rem;
+  font-size: 0.9375rem;
+  border: 1px solid $color-text;
+  border-radius: $radius-sm;
   transition: all $transition-fast;
+  background-color: white;
+  color: $color-text;
+
+  &::placeholder {
+    color: lighten($color-text, 30%);
+  }
 
   &:focus {
     outline: none;
     border-color: $color-primary;
-    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    box-shadow: 0 0 0 2px rgba($color-primary, 0.1);
   }
 
+  // Estilos de error: fondo secondary transparente degradado y borde primary
   &--error {
+    background: linear-gradient(135deg, rgba($color-secondary, 0.4) 0%, rgba($color-secondary, 0.5) 100%);
     border-color: $color-primary;
 
     &:focus {
-      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+      border-color: $color-primary;
+      box-shadow: 0 0 0 2px rgba($color-primary, 0.15);
     }
   }
 
@@ -47,27 +65,92 @@
   }
 }
 
+.input-icon-left,
+.input-icon-right {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  color: $color-text-gray-02;
+  pointer-events: none;
+}
+
+.input-icon-left {
+  left: $spacing-md;
+}
+
+.input-icon-right {
+  right: $spacing-md;
+}
+
+.has-left-icon {
+  padding-left: calc(#{$spacing-md} * 2.5);
+}
+
+.has-right-icon {
+  padding-right: calc(#{$spacing-md} * 2.5);
+}
+
 .input-toggle {
   position: absolute;
-  right: $spacing-md;
+  right: $spacing-sm;
   top: 50%;
   transform: translateY(-50%);
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 1.25rem;
+  padding: $spacing-xs;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: darken($color-text, 15%);
+  }
+
+  &:focus {
+    outline: none;
+    color: darken($color-text, 15%);
+  }
+
+  // Cuando el input tiene error, el ícono se pone rosa
+  .input-field--error ~ & {
+    color: $color-primary;
+
+    &:hover {
+      color: darken($color-primary, 10%);
+    }
+
+    &:focus {
+      color: darken($color-primary, 10%);
+    }
+  }
+
+  &.with-right-icon {
+    right: calc(#{$spacing-md} * 3);
+  }
+}
+
+.icon-format {
+  width: 18px;
+  height: 18px;
+  color: inherit;
 }
 
 .input-error {
   display: block;
   margin-top: $spacing-xs;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: $color-primary;
+  font-weight: 500;
 }
 
 .input-hint {
   display: block;
   margin-top: $spacing-xs;
-  font-size: 0.875rem;
-  color: $color-text-white;
+  font-size: 0.8125rem;
+  color: $color-text-gray-02;
 }

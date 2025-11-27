@@ -1,3 +1,6 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
 .card {
   background: white;
   border-radius: $radius-lg;
@@ -18,21 +21,42 @@
 
   &__image {
     width: 100%;
-    height: 200px;
+    height: 180px;
     overflow: hidden;
+
+    @include respond-to(tablet) {
+      height: 200px;
+    }
+
+    @include respond-to(desktop) {
+      height: 220px;
+    }
 
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform $transition-base;
     }
   }
 
+  &--hover:hover &__image img {
+    transform: scale(1.05);
+  }
+
   &__content {
-    padding: $spacing-lg;
+    padding: $spacing-md;
+
+    @include respond-to(tablet) {
+      padding: $spacing-lg;
+    }
   }
 
   &__footer {
-    padding: 0 $spacing-lg $spacing-lg;
+    padding: 0 $spacing-md $spacing-md;
+
+    @include respond-to(tablet) {
+      padding: 0 $spacing-lg $spacing-lg;
+    }
   }
 }

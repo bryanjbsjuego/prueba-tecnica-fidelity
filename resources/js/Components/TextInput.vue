@@ -1,42 +1,44 @@
-
 <template>
   <div class="input-group">
-    <label v-if="label" :for="id" class="input-label">
+    <label v-if="label" :for="id" :class="['input-label', { 'input-label--error': error }]">
       {{ label }}
       <span v-if="required" class="input-label__required">*</span>
     </label>
-
     <div class="input-wrapper">
       <input
         :id="id"
-        :type="type"
+        :type="inputType"
         :value="modelValue"
         :placeholder="placeholder"
         :disabled="disabled"
-        :class="['input-field', { 'input-field--error': error }]"
+        :class="[
+          'input-field',
+          { 'input-field--error': error },
+          { 'has-right-icon': type === 'password' && showToggle }
+        ]"
         @input="$emit('update:modelValue', $event.target.value)"
         @blur="$emit('blur')"
         @focus="$emit('focus')"
       />
-
       <button
         v-if="type === 'password' && showToggle"
         type="button"
         class="input-toggle"
         @click="togglePasswordVisibility"
+        :aria-label="inputType === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña'"
       >
-      <EyeIcon class="icon-format" style="color: brown;" />
+        <EyeIcon v-if="inputType === 'password'" class="icon-format" />
+        <EyeSlashIcon v-else class="icon-format" />
       </button>
     </div>
-
-    <span v-if="error" class="input-error">{{ error }}</span>
+    <span v-if="error && error.trim()" class="input-error">{{ error }}</span>
     <span v-else-if="hint" class="input-hint">{{ hint }}</span>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
+import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
   modelValue: [String, Number],

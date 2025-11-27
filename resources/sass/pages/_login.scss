@@ -1,102 +1,138 @@
-
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
 
 .login-page {
     min-height: 100vh;
     @include flex-center;
     background: url("../../images/Banners/banner-login.jpg") no-repeat center center;
-    padding   : $spacing-lg;
+    background-size: cover;
+    padding: $spacing-lg;
 }
 
 .login-container {
-    width    : 100%;
-    max-width: 420px;
+    width: 100%;
+    max-width: 400px;
 }
 
 .login-card {
-    background   : rgba(255, 255, 255, 0.8);
-    border-radius: $radius-xl;
-    padding      : $spacing-2xl;
-    box-shadow   : $shadow-xl;
-    height       : 470px;
-    ;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: $radius-lg;
+    padding: $spacing-xl $spacing-2xl;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 
     @include respond-to(tablet) {
-        padding: $spacing-3xl;
+        padding: $spacing-2xl $spacing-3xl;
     }
 }
 
 .login-header {
-    display        : flex;
+    display: flex;
     justify-content: center;
-    align-items    : center;
-    margin-bottom  : $spacing-xl;
+    align-items: center;
+    margin-bottom: $spacing-xl;
 }
 
 .login-title {
-    font-size    : 2rem;
+    font-size: 2rem;
     margin-bottom: $spacing-sm;
 }
 
 .login-subtitle {
-    color    : $color-text-white;
+    color: $color-text-white;
     font-size: 0.875rem;
 }
 
 .login-form {
-    margin-bottom : $spacing-lg;
-    display       : flex;
+    display: flex;
     flex-direction: column;
-}
-
-.login-submit {
-    width      : 30%;
-    margin-left: auto;
-    margin-top : $spacing-md;
-}
-
-.login-footer {
-    text-align: left;
+    gap: $spacing-sm;
 }
 
 .forgot-password {
-    font-size: 0.875rem;
-    color    : $color-text;
-    text-decoration: underline;
+    font-size: 0.8125rem;
+    color: $color-text;
+    text-align: left;
+    margin-top: -$spacing-xs;
+    margin-bottom: $spacing-xs;
 
     a {
-        color      : $color-text;
-        font-weight: 500;
+        color: $color-text;
+        font-weight: 400;
+        text-decoration: none;
 
         &:hover {
-            color          : $color-primary;
+            color: $color-primary;
             text-decoration: underline;
         }
     }
 }
 
-
 .help {
-    font-size: 0.875rem;
-    color    : $color-text;
+    font-size: 0.8125rem;
+    color: $color-text;
+    text-align: left;
+    margin-bottom: $spacing-sm;
 
     a {
-        color      : $color-text;
-        font-weight: 500;
+        color: $color-text;
+        font-weight: 400;
+        text-decoration: none;
 
         &:hover {
-            color          : $color-primary;
+            color: $color-primary;
             text-decoration: underline;
         }
     }
+}
+
+// Alerta de error - estilo rosa como en la imagen
+.login-alert {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background-color: $color-primary;
+    color: white;
+    border-radius: $radius-md;
+    font-size: 0.875rem;
+    font-weight: 600;
+    animation: slideDown 0.3s ease-out;
+    margin-bottom: $spacing-sm;
+}
+
+.alert-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-submit {
+    width: auto;
+    align-self: flex-end;
+    margin-top: $spacing-xs;
+    padding: $spacing-sm $spacing-xl;
+    font-size: 0.9375rem;
+    font-weight: 600;
 }
 
 .login-logo {
-    width  : 140px;
+    width: 160px;
     display: block;
-    margin : 0 auto;
+    margin: 0 auto;
 }
 
 .icon-format {
     width: 20px;
-    color:white ;
+    color: $color-text;
 }

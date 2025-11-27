@@ -1,3 +1,6 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
 .container {
     max-width: 1920px;
     margin   : 0 auto;
@@ -15,10 +18,30 @@
 }
 
 .page__content {
-    flex        : 1;
+  > div:first-child {
+    width: 100%;
+    margin: 0;
+    padding: 0;
 
-    @include respond-to(tablet) {
+    img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+
+      // Altura mínima en diferentes dispositivos
+      min-height: 200px;
+
+      @include respond-to(tablet) {
+        min-height: 300px;
+      }
+
+      @include respond-to(desktop) {
+        min-height: 400px;
+        max-height: 500px;
+      }
     }
+  }
 }
 
 .page-header {
@@ -32,6 +55,8 @@
     font-size    : 2rem;
     margin-bottom: $spacing-sm;
     margin-top: $spacing-3xl;
+    font-weight: 700;
+    color: $color-secondary;
 
     @include respond-to(tablet) {
         font-size: 2.5rem;
@@ -44,6 +69,7 @@
     padding-top: 15px;
     padding-bottom: 15px;
     font-size  : 1.125rem;
+    font-weight: 600;
     width      : 760px;
     text-align : center;
 }
@@ -68,7 +94,9 @@
 
 .empty-state {
     text-align: left;
-    padding   : $spacing-3xl;
-    padding-left   : 250px;
+    font-weight: 600;
+    padding-left   : $spacing-5xl;
+    padding-bottom   : $spacing-9xl;
     color     : $color-text;
+    font-size: 0.9rem;
 }

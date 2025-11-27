@@ -1,5 +1,4 @@
-
-
+@use '../abstracts/variables' as *;
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -18,7 +17,7 @@ body {
   font-size: $font-size-base;
   line-height: $line-height-base;
   color: $color-text;
-  background-color: $color-white;
+  background-color: $color-text-gray-0-5;
   min-height: 100vh;
 }
 

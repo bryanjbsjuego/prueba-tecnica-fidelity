@@ -65,11 +65,6 @@ class AuthController extends Controller
 
             $validCustomer = null;
             foreach ($customerList as $customer) {
-                // Debug de cada cliente
-                Log::info('Validando cliente', [
-                    'status' => $customer['status'] ?? 'not_set',
-                    'customer_area_status' => $customer['customer_area_status'] ?? 'not_set',
-                ]);
 
                 // Validación según requerimientos:
                 // status debe ser 1

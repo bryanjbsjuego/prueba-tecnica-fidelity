@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,9 +28,7 @@ class LoginFormRequest extends FormRequest
             ],
             'password' => [
                 'required',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/',
-                'min:8',
-                'max:35'
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,35}$/',
             ]
         ];
     }
@@ -43,10 +40,7 @@ class LoginFormRequest extends FormRequest
             'email.email' => 'Debe ingresar un correo válido.',
             'email.max' => 'El correo electrónico no debe exceder los 150 caracteres.',
             'password.required' => 'La contraseña es obligatoria.',
-            'password.regex' => 'La contraseña debe contener al menos una letra mayúscula, una minúscula y un número.',
-            'password.min' => 'La constraseña debe contener al menos 8 caracteres.',
-            'password.max' => 'La contraseña no debe exceder los 35 caracteres'
-
+            'password.regex' => 'La contraseña debe tener entre 8-35 caracteres e incluir mayúsculas, minúsculas y números.',
         ];
     }
 
@@ -57,6 +51,4 @@ class LoginFormRequest extends FormRequest
             'password' => trim($this->password),
         ]);
     }
-
-
 }
