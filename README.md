@@ -46,7 +46,7 @@ php artisan key:generate
 php artisan jwt:secret
 ```
 
-### 3. Configurar Base de Datos
+### 3. Ejemplo de .env
 
 Editar `.env`:
 
